@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "@barg-systems/pwa-test-bargsys",
+  "name": "@bargsystems/pwa-test-bargsys",
   "version": "0.1.26",
   "repository": "https://github.com/beezybarg/loro-testnet-example-pwa",
   "scripts": {
