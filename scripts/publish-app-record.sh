@@ -9,7 +9,6 @@ CONFIG_FILE=`mktemp`
 CERC_APP_TYPE=${CERC_APP_TYPE:-"webapp"}
 CERC_REPO_REF=${CERC_REPO_REF:-${GITHUB_SHA:-`git log -1 --format="%H"`}}
 CERC_IS_LATEST_RELEASE=${CERC_IS_LATEST_RELEASE:-"true"}
-
 rcd_name=$(jq -r '.name' package.json | sed 's/null//')
 rcd_desc=$(jq -r '.description' package.json | sed 's/null//')
 rcd_repository=$(jq -r '.repository' package.json | sed 's/null//')
@@ -27,6 +26,9 @@ services:
     gas: 9550000
     fees: 15000000alnt
 EOF
+
+_BOND_ID=$(laconic registry bond list --user-key "$CERC_REGISTRY_USER_KEY")
+echo $_BOND_ID
 
 if [ -z "$CERC_REGISTRY_BOND_ID" ]; then
   bond_id=$(laconic -c $CONFIG_FILE registry bond create --type alnt --quantity 100000000 --user-key "${CERC_REGISTRY_USER_KEY}")
