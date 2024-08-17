@@ -27,8 +27,6 @@ services:
     fees: 15000000alnt
 EOF
 
-_BOND_ID=$(laconic registry bond list --user-key "$CERC_REGISTRY_USER_KEY")
-echo $_BOND_ID
 
 if [ -z "$CERC_REGISTRY_BOND_ID" ]; then
   bond_id=$(laconic -c $CONFIG_FILE registry bond create --type alnt --quantity 100000000 --user-key "${CERC_REGISTRY_USER_KEY}")
