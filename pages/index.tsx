@@ -21,7 +21,9 @@ export default function Home() {
         <p className={styles.card}>
           WEBAPP_DEBUG has value: {process.env.CERC_WEBAPP_DEBUG}
         </p>
-
+        <p className={styles.card}>
+          barg.systems is great!
+        </p>
         </div>
 
       </main>
