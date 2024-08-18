@@ -4,7 +4,7 @@ set -e
 
 AR_RECORD_FILE=tmp.rf.$$
 ADR_RECORD_FILE=tmp.rf.$$
-CONFIG_FILE=greg
+CONFIG_FILE=`mktemp`
 
 CERC_APP_TYPE=${CERC_APP_TYPE:-"webapp"}
 CERC_REPO_REF=${CERC_REPO_REF:-${GITHUB_SHA:-`git log -1 --format="%H"`}}
@@ -30,17 +30,16 @@ EOF
 
 if [ -z "$CERC_REGISTRY_BOND_ID" ]; then
   bond_id=$(laconic -c $CONFIG_FILE registry bond create --type alnt --quantity 100000000 --user-key "${CERC_REGISTRY_USER_KEY}")
-  echo ${bond_id}
+
   CERC_REGISTRY_BOND_ID=$(echo ${bond_id} | jq -r .bondId)
 fi
 
 next_ver=$(laconic -c $CONFIG_FILE registry record list --type ApplicationRecord --all --name "$rcd_name" 2>/dev/null | jq -r -s ".[] | sort_by(.createTime) | reverse | [ .[] | select(.bondId == \"$CERC_REGISTRY_BOND_ID\") ] | .[0].attributes.version" | awk -F. -v OFS=. '{$NF += 1 ; print}')
-echo nextver $next_ver
+
 if [ -z "$next_ver" ] || [ "1" == "$next_ver" ]; then
   next_ver=0.0.1
 fi
 
-echo "creating AR record file"
 cat <<EOF | sed '/.*: ""$/d' > "$AR_RECORD_FILE"
 record:
   type: ApplicationRecord
@@ -58,7 +57,7 @@ record:
 EOF
 
 
-cat "$AR_RECORD_FILE"
+cat $AR_RECORD_FILE
 AR_RECORD_ID=$(laconic -c $CONFIG_FILE registry record publish --filename $AR_RECORD_FILE --user-key "${CERC_REGISTRY_USER_KEY}" --bond-id ${CERC_REGISTRY_BOND_ID} | jq -r '.id')
 echo $AR_RECORD_ID
 
@@ -66,7 +65,7 @@ if [ -z "$CERC_REGISTRY_APP_CRN" ]; then
   authority=$(echo "$rcd_name" | cut -d'/' -f1 | sed 's/@//')
   app=$(echo "$rcd_name" | cut -d'/' -f2-)
   CERC_REGISTRY_APP_CRN="lrn://$authority/applications/$app"
-#  laconic -c $CONFIG_FILE registry authority reserve ${authority} --user-key "${CERC_REGISTRY_USER_KEY}"
+  laconic -c $CONFIG_FILE registry authority reserve ${authority} --user-key "${CERC_REGISTRY_USER_KEY}"
   laconic -c $CONFIG_FILE registry authority bond set ${authority} ${CERC_REGISTRY_BOND_ID} --user-key "${CERC_REGISTRY_USER_KEY}"
 fi
 
